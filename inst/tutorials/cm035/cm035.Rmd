@@ -9,6 +9,7 @@ runtime: shiny_prerendered
 ```{r setup, include=FALSE}
 library(learnr)
 library(tidyverse)
+library(extrafont)
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
@@ -53,27 +54,23 @@ For every distribution there are four prefixes. The parameters (in parentheses) 
 | `q___()` | the inverse cumulative density function (quantiles) |
 | `r___()` | randomly generated numbers |
 
-To find the probability, p, using traditional statistical methods, you'll need to first know whether the distribution is discrete or continuous. If discrete, then to find the probability you would use 
 
-Write the R code required to add two plus two:
-
-```{r two-plus-two, exercise=TRUE}
-
-```
-
-### Exercise with Code
-
-*Here's an exercise with some prepopulated code as well as `exercise.lines = 5` to provide a bit more initial room to work.*
-
-Now write a function that adds any two numbers and then call it:
-
-```{r add-function, exercise=TRUE, exercise.lines = 5}
-add <- function() {
-  
-}
-```
 
 ## Finding p-values
+
+From [Wikipedia](https://en.wikipedia.org/wiki/P-value):
+
+> "The p-value is defined as the probability, under the assumption of the null hypothesis, of obtaining a result equal to or more extreme than what was actually observed.""
+
+- Depending on how it is looked at, the "more extreme than what was actually observed" can mean
+    -  $X \geq x$ (right-tailevent) or
+    -  $X \leq x$ (left-tailevent) or
+    - the "smaller" of $X \leq x$ and $X \geq x$ (double-tailed event).
+- Thus, the p-value is given by:
+    - $Pr(X \geq x | H)$ for right tail event,
+    - $Pr(X \leq x | H)$ for left tail event,
+    - ${\displaystyle 2 \times \min\{\Pr(X\leq x|H),\Pr(X\geq x|H)\}}$ for double tail event (also read here: https://math.stackexchange.com/questions/1493880/two-tailed-hypothesis-test-why-do-we-multiply-p-value-by-two)
+
 
 
 To find a p-value, you first need to know if the null distribution you are working with is discrete or continuous.
@@ -106,9 +103,8 @@ From [Wikipedia](https://en.wikipedia.org/wiki/Lady_tasting_tea):
 
 > "The experiment provided the lady with 8 randomly ordered cups of tea—4 prepared by first adding milk, 4 prepared by first adding the tea. She was to select the 4 cups prepared by one method. This offered the lady the advantage of judging cups by comparison. She was fully informed of the experimental method. The null hypothesis was that the lady had no ability to distinguish the teas. The test statistic was a simple count of the number of successes in selecting the 4 cups (the number of cups of the given type successfully selected)."
 
-Note that she only had to select 4 cups prepared by one method- since she had only 8 cups to choose from, the non-selected 4 cups are assumed to come from the other method. Such an experiment is known to produce a discrete variable with a hypergeometric distribution. This distribution has 4 parameters:
+Note that she only had to select 4 cups prepared by one method- since she had only 8 cups to choose from, the non-selected 4 cups are assumed to come from the other method. Such an experiment is known to produce a discrete variable with a hypergeometric distribution. This distribution has 3 parameters:
 
-* `x, q`	vector of quantiles representing the number of white balls drawn without replacement from an urn which contains both black and white balls.
 * `m`	the number of white balls in the urn. [cups with milk then tea]	
 * `n`	the number of black balls in the urn. [cups with tea then milk]
 * `k`	the number of balls drawn from the urn. [number of “draws”]
@@ -134,21 +130,33 @@ dhyper(4, 4, 4, 4)
 
 ### 3. 
 
-Find the probability that Muriel could have guessed 0, 1, 2, 3, or 4 cups correctly. *Hint: look up `?seq`*
+Find the probability that Muriel guessed 3 or more cups correctly. *Hint: look up `?sum`*
 
 ```{r p3, exercise=TRUE, eval = FALSE}
-dhyper(seq(from = _, to = _), _, _, _)
+__(dhyper(seq(from = _, to = _), _, _, _))
 ```
 
 ```{r print-p3-hint}
-dhyper(seq(from = 0, to = 4), 4, 4, 4)
+sum(dhyper(seq(from = 3, to = 4), 4, 4, 4))
 ```
 
 ### 4. 
 
-Now save these numbers into a `tibble`, and make a plot of the probabilities for the hypergeometric distribution on y-axis, across each value of correct cups of tea guessed on the x-axis. Try adding `geom_segment` to represent the distance between the x-axis and the probability.
+Find the five probabilities associated with Muriel guessing 0, 1, 2, 3, or 4 cups correctly. *Hint: look up `?seq`*
 
 ```{r p4, exercise=TRUE, eval = FALSE}
+dhyper(seq(from = _, to = _), _, _, _)
+```
+
+```{r print-p4-hint}
+dhyper(seq(from = 0, to = 4), 4, 4, 4)
+```
+
+### 5. 
+
+Now save these numbers into a `tibble`, and make a plot of the probabilities for the hypergeometric distribution on y-axis, across each value of correct cups of tea guessed on the x-axis. Try adding `geom_segment` to represent the distance between the x-axis and the probability.
+
+```{r p5, exercise=TRUE, eval = FALSE}
 library(tibble)
 muriel <- tibble(
   cups_correct = seq(from = _, to = _),
@@ -156,7 +164,7 @@ muriel <- tibble(
 )
 ```
 
-```{r print-p4-hint}
+```{r print-p5-hint}
 muriel <- tibble(
   cups_correct = seq(from = 0, to = 4),
   prob = dhyper(seq(from = 0, to = 4), 4, 4, 4)
@@ -168,55 +176,193 @@ ggplot(muriel, aes(x = cups_correct, y = prob)) +
 
 
 
-### 5.
+### 6.
 
 Let's say Fisher devises a new experiment with 100 cups of tea total (50% prepared with tea before milk, 50% prepared with milk before tea), and asks Muriel to guess 50 prepared by one method. Here is the distribution for the resulting variable from this experiment:
 
-```{r print-p5-pre}
-muriel <- tibble(
+```{r print-p6-pre}
+muriel_half <- tibble(
   cups_correct = seq(from = 0, to = 50),
   prob = dhyper(seq(from = 0, to = 50), 50, 50, 50)
 )
-ggplot(muriel, aes(x = cups_correct, y = prob)) +
+ggplot(muriel_half, aes(x = cups_correct, y = prob)) +
   geom_segment(aes(xend = cups_correct, y = 0, yend = prob)) +
   geom_point(colour = "mediumseagreen") 
 ```
 
 We will reject the null hypothesis that Muriel is "average" if her performance falls outside of the 95% confidence interval for $\mu$. What is the 95% confidence interval?
 
-```{r p5, exercise=TRUE, eval = FALSE}
+```{r p6, exercise=TRUE, eval = FALSE}
 qhyper(c(_, _), _, _, _) 
 ```
 
-```{r print-p5-hint}
+```{r print-p6-hint}
 qhyper(c(.025, .975), 50, 50, 50) 
 ```
 
 
-### 6.
+### 7.
 
 In this fictitious experiment with 100 cups of tea, what is the probability that Muriel will get exactly 31 correct?
 
-```{r p6, exercise=TRUE, eval = FALSE}
+```{r p7, exercise=TRUE, eval = FALSE}
 
 ```
 
-```{r print-p6-hint}
+```{r print-p7-hint}
 dhyper(31, 50, 50, 50) 
 ```
 
-### Exercise with Hint
+### 8.
 
-*Here's an exercise where the chunk is pre-evaulated via the `exercise.eval` option (so the user can see the default output we'd like them to customize). We also add a "hint" to the correct solution via the chunk immediate below labeled `print-limit-hint`.*
+Inspired by Alan Shepard, the first American to journey into space, a 14-year-old Hillary Rodham from suburban Chicago wrote a letter to NASA in 1961 asking what she needed to do to become an astronaut. 
 
-Modify the following code to limit the number of rows printed to 5:
+Let's pretend that, upon receipt of the letter in 1961, NASA decided to conduct a study to test whether girls who are aspiring astronauts in high school have “above average” IQ. Unfortunately, the NASA budget in 1961 was pretty low. So they studied only 25 high school girls, all of whom were aspiring astronauts (AA). Assume that IQ scores in the population are known to be normally distributed with $\mu$ = 100; $\sigma$ = 15.
 
-```{r print-limit, exercise=TRUE, exercise.eval=TRUE}
-mtcars
+What is the mean and standard deviation (the “standard error”) of the theoretical null distribution (the sampling distribution of the sample means)?
+
+```{r p8, exercise = TRUE}
+null_mu <- 
+null_se <- 
 ```
 
-```{r print-limit-hint}
-head(mtcars)
+
+### 9. 
+
+In our same fictitious aspiring astronauts example, let $\alpha$ = .05 (1-tailed). What value will our sample mean need to “beat” in order for us to conclude that it is higher than the population mean (given random variation present in our sample)? What would you conclude if our sample mean is 104? What if it is 108?
+
+
+```{r p9, exercise = TRUE}
+
+```
+
+```{r upper_tail_iq}
+library(ggplot2)
+library(grid)
+x <- pretty(90:110, 1000)   
+y <- dnorm(x, 100, 3)
+df <- data.frame(x = x, y = y)
+ggplot(df, aes(x = x, y = y)) + 
+  stat_function(fun = dnorm, args = list(mean = 100, sd = 3)) +
+  geom_ribbon(data = subset(df, x > qnorm(.95, 100, 3)), 
+              aes(ymin = 0, ymax = y), 
+              alpha = 0.25) +
+  geom_segment(aes(x = 100, 
+                   y = 0, 
+                   xend = 100, 
+                   yend = y), 
+               linetype = "dotted") +
+  geom_segment(aes(x = qnorm(.95, 100, 3), 
+                   y = 0, 
+                   xend = qnorm(.95, 100, 3), 
+                   yend = dnorm(qnorm(.95, 100, 3), 100, 3)),
+               linetype = "solid") +
+  geom_segment(aes(x = min(x), 
+                   y = 0, 
+                   xend = max(x), 
+                   yend = 0),
+               linetype = "solid") +
+  theme(axis.title = element_blank(), 
+        panel.grid = element_blank(), 
+        panel.background=element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.y = element_blank()) +
+  annotate("text", x = qnorm(.95, 100, 3) + 3, 
+           y = 0.02, 
+           label = "p = 0.05", 
+           size = 4, 
+           family = "Lato")  +
+  geom_segment(aes(x = qnorm(.95, 100, 3), 
+                   y = dnorm(qnorm(.90, 100, 3), 100, 3), 
+                   xend = qnorm(.95, 100, 3), 
+                   yend = dnorm(qnorm(.94, 100, 3), 100, 3)), 
+               arrow = arrow(length = unit(0.2, "cm"))) +
+  annotate("text", x = qnorm(.95, 100, 3), 
+           y = dnorm(qnorm(.89, 100, 3), 100, 3), 
+           label = "q = ?", 
+           size = 4, 
+           family = "Lato")
+```
+
+### 10.
+
+In our same fictitious aspiring astronauts example, let $\alpha$ = .05 (2-tailed). What value(s) will our sample mean need to “beat” in order for us to conclude that it is different than the population mean (given random variation present in our sample)? What would you conclude if our sample mean is 105? 
+
+```{r p10, exercise = TRUE}
+
+```
+
+```{r two_tail_iq}
+library(ggplot2)
+library(grid)
+x <- pretty(90:110, 1000)   
+y <- dnorm(x, 100, 3)
+df <- data.frame(x = x, y = y)
+two_tail_z <- ggplot(df, aes(x = x, y = y)) + 
+  stat_function(fun = dnorm, args = list(mean = 100, sd = 3)) +
+  geom_ribbon(data = subset(df, x > qnorm(.975, 100, 3)), 
+              aes(ymin = 0, ymax = y), 
+              alpha = 0.25) +
+  geom_ribbon(data = subset(df, x < qnorm(.025, 100, 3)), 
+              aes(ymin = 0, ymax = y), 
+              alpha = 0.25) +
+  geom_segment(aes(x = 100, 
+                   y = 0, 
+                   xend = 100, 
+                   yend = y), 
+               linetype = "dotted") +
+  geom_segment(aes(x = qnorm(.975, 100, 3), 
+                   y = 0, 
+                   xend = qnorm(.975, 100, 3), 
+                   yend = dnorm(qnorm(.975, 100, 3), 100, 3)),
+               linetype = "solid") +
+  geom_segment(aes(x = qnorm(.025, 100, 3), 
+                   y = 0, 
+                   xend = qnorm(.025, 100, 3), 
+                   yend = dnorm(qnorm(.025, 100, 3), 100, 3)),
+               linetype = "solid") +
+    geom_segment(aes(x = min(x), 
+                   y = 0, 
+                   xend = max(x), 
+                   yend = 0),
+               linetype = "solid") +
+  theme(axis.title = element_blank(), 
+        panel.grid = element_blank(), 
+        panel.background=element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.y = element_blank()) +
+  annotate("text", x = qnorm(.95, 100, 3) + 3, 
+           y = 0.02, 
+           label = "p = 0.025", 
+           size = 4, 
+           family = "Lato")  +
+  geom_segment(aes(x = qnorm(.975, 100, 3), 
+                   y = dnorm(qnorm(.95, 100, 3), 100, 3), 
+                   xend = qnorm(.975, 100, 3), 
+                   yend = dnorm(qnorm(.97, 100, 3), 100, 3)), 
+               arrow = arrow(length = unit(0.2, "cm"))) +
+  annotate("text", x = qnorm(.98, 100, 3), 
+           y = dnorm(qnorm(.94, 100, 3), 100, 3), 
+           label = "q = ?", 
+           size = 4, 
+           family = "Lato") +
+  annotate("text", x = qnorm(.05, 100, 3) - 3, 
+           y = 0.02, 
+           label = "p = 0.025", 
+           size = 4, 
+           family = "Lato")  +
+  geom_segment(aes(x = qnorm(.025, 100, 3), 
+                   y = dnorm(qnorm(.05, 100, 3), 100, 3), 
+                   xend = qnorm(.025, 100, 3), 
+                   yend = dnorm(qnorm(.03, 100, 3), 100, 3)), 
+               arrow = arrow(length = unit(0.2, "cm"))) +
+  annotate("text", x = qnorm(.02, 100, 3), 
+           y = dnorm(qnorm(.06, 100, 3), 100, 3), 
+           label = "q = ?", 
+           size = 4, 
+           family = "Lato")
+two_tail_z
+two_tail_z + geom_vline(aes(xintercept = 105), colour = "red", lty = "dashed")
 ```
 
 ### Quiz
@@ -387,7 +533,7 @@ Suppose that the readings of a laboratory scale are normally distributed with un
 
 **Hint: since you know $\sigma$ but not the sample standard deviation, you should use the normal distribution, not the t-distribution.**
 
-```{r ci2, exercise=TRUE, eval = FALSE}
+```{r ci2, exercise=TRUE, eval = FALSE, exercise.lines = 5}
 xbar <- 0.998
 sigma <- 0.01
 N <- 50
