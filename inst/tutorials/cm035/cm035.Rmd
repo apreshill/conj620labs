@@ -9,7 +9,6 @@ runtime: shiny_prerendered
 ```{r setup, include=FALSE}
 library(learnr)
 library(tidyverse)
-library(extrafont)
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
@@ -271,8 +270,7 @@ ggplot(df, aes(x = x, y = y)) +
   annotate("text", x = qnorm(.95, 100, 3) + 3, 
            y = 0.02, 
            label = "p = 0.05", 
-           size = 4, 
-           family = "Lato")  +
+           size = 4)  +
   geom_segment(aes(x = qnorm(.95, 100, 3), 
                    y = dnorm(qnorm(.90, 100, 3), 100, 3), 
                    xend = qnorm(.95, 100, 3), 
@@ -281,8 +279,7 @@ ggplot(df, aes(x = x, y = y)) +
   annotate("text", x = qnorm(.95, 100, 3), 
            y = dnorm(qnorm(.89, 100, 3), 100, 3), 
            label = "q = ?", 
-           size = 4, 
-           family = "Lato")
+           size = 4)
 ```
 
 ### 10.
@@ -335,8 +332,7 @@ two_tail_z <- ggplot(df, aes(x = x, y = y)) +
   annotate("text", x = qnorm(.95, 100, 3) + 3, 
            y = 0.02, 
            label = "p = 0.025", 
-           size = 4, 
-           family = "Lato")  +
+           size = 4)  +
   geom_segment(aes(x = qnorm(.975, 100, 3), 
                    y = dnorm(qnorm(.95, 100, 3), 100, 3), 
                    xend = qnorm(.975, 100, 3), 
@@ -345,13 +341,11 @@ two_tail_z <- ggplot(df, aes(x = x, y = y)) +
   annotate("text", x = qnorm(.98, 100, 3), 
            y = dnorm(qnorm(.94, 100, 3), 100, 3), 
            label = "q = ?", 
-           size = 4, 
-           family = "Lato") +
+           size = 4) +
   annotate("text", x = qnorm(.05, 100, 3) - 3, 
            y = 0.02, 
            label = "p = 0.025", 
-           size = 4, 
-           family = "Lato")  +
+           size = 4)  +
   geom_segment(aes(x = qnorm(.025, 100, 3), 
                    y = dnorm(qnorm(.05, 100, 3), 100, 3), 
                    xend = qnorm(.025, 100, 3), 
@@ -360,8 +354,7 @@ two_tail_z <- ggplot(df, aes(x = x, y = y)) +
   annotate("text", x = qnorm(.02, 100, 3), 
            y = dnorm(qnorm(.06, 100, 3), 100, 3), 
            label = "q = ?", 
-           size = 4, 
-           family = "Lato")
+           size = 4)
 two_tail_z
 two_tail_z + geom_vline(aes(xintercept = 105), colour = "red", lty = "dashed")
 ```

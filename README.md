@@ -1,25 +1,14 @@
----
-output: github_document
----
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  fig.path = "man/figures/README-",
-  out.width = "100%"
-)
-```
-# CONJ620 Labs
-
+CONJ620 Labs
+============
 
 `conj620labs` is implemented as a [LearnR package](https://rstudio.github.io/learnr/). It can be set up on a Shiny server such as shinyapps.io or can be installed and run on a computer with the instructions below.
 
-View the actual tutorial here: 
+View the actual tutorial here:
 
-## Installation
+Installation
+------------
 
 You can install the development version from [GitHub](https://github.com/) with:
 
@@ -31,7 +20,6 @@ remotes::install_github("apreshill/conj620labs")
 
 You can then run the tutorial with
 
-```r
+``` r
 learnr::run_tutorial("cm035", package = "conj620labs")
 ```
-
