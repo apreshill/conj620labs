@@ -1,20 +1,59 @@
 ---
 title: "Tutorial"
-output: learnr::tutorial
+output: 
+  learnr::tutorial:
+    theme: flatly
 runtime: shiny_prerendered
 ---
 
 ```{r setup, include=FALSE}
 library(learnr)
+library(tidyverse)
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
 
-## Topic 1
+## Probability Distributions in R
 
 ### Exercise 
 
 *Here's a simple exercise with an empty code chunk provided for entering the answer.*
+
+```{r eval = FALSE}
+help(Distributions)
+```
+
+
+Generally, there are two types of distributions: continuous and discrete.
+
+| Type | Distributions | In `R` | Parameters | Default Values |
+| :--- | :------------:| :----: | :--------: | :------------: |
+| Continuous | Beta ($\beta$)         | `beta` | shape1, shape2 | |
+|            | Cauchy                 | `cauchy` | location, scale | 0, 1 |
+|            | Chi-square ($\chi^2$)  | `chisq` | degrees of freedom (df)| |
+|            | Exponential            | `exp` | 1/mean | 1 |
+|            | *F*                    | `f` | df1, df2 | |
+|            | Gamma ($\gamma$)       | `gamma`| shape, 1/scale | NA, 1 |
+|            | Normal                 | `norm`| mean, standard deviation (sd) | 0, 1
+|            | Student's *t*          | `t` | df | |
+|            | Uniform                | `unif`| min, max | 0, 1
+|            | Weibull                | `weibull` | shape | |
+| Discrete   | Binomial               | `binom` | size, probability | |
+|            | Geometric              | `geom` | probability | |
+|            | Hypergeometric         | `hyper` | m, n, k | |
+|            | Poisson                | `pois` | lambda | |
+
+
+For every distribution there are four prefixes. The parameters (in parentheses) for each depend on the *core distribution*:
+
+| `R` command | Returns |
+| ------- |:-------:|
+| `d___()` | the height of the probability density function (probability mass function for discrete) |
+| `p___()` | the cumulative density function |
+| `q___()` | the inverse cumulative density function (quantiles) |
+| `r___()` | randomly generated numbers |
+
+To find the probability, p, using traditional statistical methods, you'll need to first know whether the distribution is discrete or continuous. If discrete, then to find the probability you would use 
 
 Write the R code required to add two plus two:
 
@@ -34,7 +73,137 @@ add <- function() {
 }
 ```
 
-## Topic 2
+## Finding p-values
+
+
+To find a p-value, you first need to know if the null distribution you are working with is discrete or continuous.
+
+- If discrete, you'll want to use `d__()`. This provides a *point* probability- you'll need to sum to find the probability of a range.
+- If continuous, you'll want to use `p__()`. The probability for a single point within a continuous distribution is 0- you can only calculate probability across a range of continuous values. This function takes a quantile (or a vector of quantiles) for the named distribution as input, and returns a probability (between 0 and 1).
+
+### 1.
+
+IQ scores have a distribution that is approximately normal in shape, with a mean of 100 and a standard deviation of 15. What percentage of scores is at or above an IQ of 116? (put a `#` before the line of code you don't edit)
+
+```{r p1, exercise=TRUE, eval = FALSE}
+1 - pnorm(_, _, _)
+
+# OR
+
+pnorm(_, _, _, lower.tail = FALSE)
+```
+
+```{r print-p1-hint}
+1 - pnorm(116,100,15)
+```
+
+
+### 2.
+
+Read the ["Lady Tasting Tea" excerpt from ModernDive](https://moderndive.com/previous_versions/v0.2.0/7-sim.html#simulation).
+
+From [Wikipedia](https://en.wikipedia.org/wiki/Lady_tasting_tea):
+
+> "The experiment provided the lady with 8 randomly ordered cups of tea—4 prepared by first adding milk, 4 prepared by first adding the tea. She was to select the 4 cups prepared by one method. This offered the lady the advantage of judging cups by comparison. She was fully informed of the experimental method. The null hypothesis was that the lady had no ability to distinguish the teas. The test statistic was a simple count of the number of successes in selecting the 4 cups (the number of cups of the given type successfully selected)."
+
+Note that she only had to select 4 cups prepared by one method- since she had only 8 cups to choose from, the non-selected 4 cups are assumed to come from the other method. Such an experiment is known to produce a discrete variable with a hypergeometric distribution. This distribution has 4 parameters:
+
+* `x, q`	vector of quantiles representing the number of white balls drawn without replacement from an urn which contains both black and white balls.
+* `m`	the number of white balls in the urn. [cups with milk then tea]	
+* `n`	the number of black balls in the urn. [cups with tea then milk]
+* `k`	the number of balls drawn from the urn. [number of “draws”]
+
+Where `m + n` is the total number of balls in the urn, or in this case cups of tea. As the story goes, the lady identified all 4 cups correctly (and thus, all 8 cups were correct). What were the chances (exactly!)?
+
+
+```{r p2, exercise=TRUE, eval = FALSE}
+dhyper(_, _, _, _)
+
+# OR
+
+1 - phyper(_, _, _, _)
+```
+
+```{r print-p2-hint}
+dhyper(4, 4, 4, 4)
+
+# OR
+
+#1 - phyper(3, 4, 4, 4)
+```
+
+### 3. 
+
+Find the probability that Muriel could have guessed 0, 1, 2, 3, or 4 cups correctly. *Hint: look up `?seq`*
+
+```{r p3, exercise=TRUE, eval = FALSE}
+dhyper(seq(from = _, to = _), _, _, _)
+```
+
+```{r print-p3-hint}
+dhyper(seq(from = 0, to = 4), 4, 4, 4)
+```
+
+### 4. 
+
+Now save these numbers into a `tibble`, and make a plot of the probabilities for the hypergeometric distribution on y-axis, across each value of correct cups of tea guessed on the x-axis. Try adding `geom_segment` to represent the distance between the x-axis and the probability.
+
+```{r p4, exercise=TRUE, eval = FALSE}
+library(tibble)
+muriel <- tibble(
+  cups_correct = seq(from = _, to = _),
+  prob = dhyper(seq(from = _, to = _), _, _, _)
+)
+```
+
+```{r print-p4-hint}
+muriel <- tibble(
+  cups_correct = seq(from = 0, to = 4),
+  prob = dhyper(seq(from = 0, to = 4), 4, 4, 4)
+)
+ggplot(muriel, aes(x = cups_correct, y = prob)) +
+  geom_segment(aes(xend = cups_correct, y = 0, yend = prob)) +
+  geom_point(colour = "mediumseagreen") 
+```
+
+
+
+### 5.
+
+Let's say Fisher devises a new experiment with 100 cups of tea total (50% prepared with tea before milk, 50% prepared with milk before tea), and asks Muriel to guess 50 prepared by one method. Here is the distribution for the resulting variable from this experiment:
+
+```{r print-p5-pre}
+muriel <- tibble(
+  cups_correct = seq(from = 0, to = 50),
+  prob = dhyper(seq(from = 0, to = 50), 50, 50, 50)
+)
+ggplot(muriel, aes(x = cups_correct, y = prob)) +
+  geom_segment(aes(xend = cups_correct, y = 0, yend = prob)) +
+  geom_point(colour = "mediumseagreen") 
+```
+
+We will reject the null hypothesis that Muriel is "average" if her performance falls outside of the 95% confidence interval for $\mu$. What is the 95% confidence interval?
+
+```{r p5, exercise=TRUE, eval = FALSE}
+qhyper(c(_, _), _, _, _) 
+```
+
+```{r print-p5-hint}
+qhyper(c(.025, .975), 50, 50, 50) 
+```
+
+
+### 6.
+
+In this fictitious experiment with 100 cups of tea, what is the probability that Muriel will get exactly 31 correct?
+
+```{r p6, exercise=TRUE, eval = FALSE}
+
+```
+
+```{r print-p6-hint}
+dhyper(31, 50, 50, 50) 
+```
 
 ### Exercise with Hint
 
@@ -71,5 +240,163 @@ quiz(
     answer("grid", correct = TRUE)
   )
 )
+```
+
+## Finding critical values
+
+> __Critical Value(s)__: the value of a given test statistic that corresponds to a rejection point- the point at which you determine to reject the null hypothesis. The critical value defines the boundary of the rejection region for $H_0$. This value depends on the significance level, $\alpha$, and whether the test is one-sided or two-sided.
+
+To find critical values, you'll want to use `q(*)`. This function takes a probability (between 0 and 1) as input, and returns the quantile for the `*` distribution.
+
+### 1.
+
+Suppose you want to test the null hypothesis that $\mu$=100 with a sample size of *n*=25 and an $\alpha$=.05. What will the critical value(s) for the *t* statistic be?
+
+```{r crit1, exercise=TRUE, eval = FALSE}
+qt(c(_, _), _) 
+```
+
+```{r print-crit1-hint}
+qt(c(.025, .975), 24)
+```
+
+
+### 2.
+
+Suppose you want to test the null hypothesis that $\mu\leq{100}$ with a sample size *n*=60 and an $\alpha$=.01. What will the critical value(s) for the *t* statistic be?
+
+```{r crit2, exercise=TRUE, eval = FALSE}
+qt(_, _) # upper only
+```
+
+```{r print-crit2-hint}
+qt(0.99, 59)
+```
+
+
+### 3.
+
+You conduct a one-sample *t* test with *N*=101 and report a *p*-value of .0245. What is the *t*-statistic value? 
+
+```{r crit3, exercise=TRUE, eval = FALSE}
+qt(_, _)
+```
+
+```{r print-crit3-hint}
+qt(.0245, 100)
+```
+
+### 4.
+
+What are the critical values of *t* for *N*=8; $\alpha$=.05 using a directional hypothesis in the upper tail (assume testing of means)?
+
+```{r crit4, exercise=TRUE, eval = FALSE}
+qt(_, _)
+```
+
+```{r print-crit4-hint}
+qt(.95, 7)
+```
+
+### 5.
+
+What are the critical values of *t* for *N*=15; $\alpha$=.01 using a directional hypothesis in the upper tail (assume testing of means)?
+
+```{r crit5, exercise=TRUE, eval = FALSE}
+qt(_, _)
+```
+
+```{r print-crit5-hint}
+qt(.99, 14)
+```
+
+### 6.
+
+What are the critical values of *t* for *N*=51; $\alpha$=.025 using a directional hypothesis in the upper tail (assume testing of means)?
+
+```{r crit6, exercise=TRUE, eval = FALSE}
+qt(_, _)
+```
+
+```{r print-crit6-hint}
+qt(.975, 50)
+```
+
+### 7.
+
+What are the critical values of *t* for *N*=12; $\alpha$=.05 using a directional hypothesis in the upper tail (assume testing of means)?
+
+```{r crit7, exercise=TRUE, eval = FALSE}
+qt(c(_, _), _)
+```
+
+```{r print-crit7-hint}
+qt(c(.025, .975), 11)
+```
+
+### 8.
+
+What are the critical values of *t* for *N*=20; $\alpha$=.01 using a directional hypothesis in the upper tail (assume testing of means)?
+
+```{r crit8, exercise=TRUE, eval = FALSE}
+qt(c(_, _), _)
+```
+
+```{r print-crit8-hint}
+qt(c(.005, .995), 19)
+```
+
+### 9.
+
+What are the critical values of *t* for *N*=2; $\alpha$=.05 using a directional hypothesis in the upper tail (assume testing of means)?
+
+```{r crit9, exercise=TRUE, eval = FALSE}
+qt(c(_, _), _)
+```
+
+```{r print-crit9-hint}
+qt(c(.025, .975), 1)
+```
+
+
+
+## Finding confidence intervals
+
+### 1.
+
+Given the following sample statistics ($\bar{x}$=13.0, sd=1.6, *N*=21), what is the 95% confidence interval for $\mu$?
+
+```{r ci1, exercise=TRUE, eval = FALSE}
+xbar <- 13
+sd <- 1.6
+N <- 21
+```
+
+```{r print-ci1-hint}
+xbar <- 13
+sd <- 1.6
+N <- 21
+se <- sd/sqrt(N)
+crit_t <- qt(.975, N-1)
+c(xbar - crit_t*se, xbar + crit_t*se)
+```
+
+### 2. 
+
+Suppose that the readings of a laboratory scale are normally distributed with unknown mean $\mu$ and standard deviation $\sigma$ = 0.01 grams. To assess the accuracy of the laboratory scale, a standard weight that is known to weigh exactly 1 gram is repeatedly weighed a total of *N* = 50 times. Let $\bar{x}$ = 0.998 be the average of the 50 readings. What is the 95% confidence interval for $\mu$?
+
+**Hint: since you know $\sigma$ but not the sample standard deviation, you should use the normal distribution, not the t-distribution.**
+
+```{r ci2, exercise=TRUE, eval = FALSE}
+xbar <- 0.998
+sigma <- 0.01
+N <- 50
+```
+
+```{r print-ci2-hint}
+xbar <- 0.998
+sigma <- 0.01
+N <- 50
+crit_z <- qnorm(c(.025, .975), mean = 1, sd = .01)
 ```
 
