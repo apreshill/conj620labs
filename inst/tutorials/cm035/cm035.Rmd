@@ -14,6 +14,7 @@ knitr::opts_chunk$set(echo = FALSE)
 ```
 
 
+
 ## Probability Distributions in R
 
 ### Exercise 
@@ -130,7 +131,7 @@ dhyper(4, 4, 4, 4)
 
 ### 3. 
 
-Find the probability that Muriel guessed 3 or more cups correctly. *Hint: look up `?sum`*
+Find the probability that Muriel guessed 3 or more cups correctly. *Hint: look up `?sum` and `?seq`*
 
 ```{r p3, exercise=TRUE, eval = FALSE}
 __(dhyper(seq(from = _, to = _), _, _, _))
@@ -365,28 +366,6 @@ two_tail_z
 two_tail_z + geom_vline(aes(xintercept = 105), colour = "red", lty = "dashed")
 ```
 
-### Quiz
-
-*You can include any number of single or multiple choice questions as a quiz. Use the `question` function to define a question and the `quiz` function for grouping multiple questions together.*
-
-Some questions to verify that you understand the purposes of various base and recommended R packages:
-
-```{r quiz}
-quiz(
-  question("Which package contains functions for installing other R packages?",
-    answer("base"),
-    answer("tools"),
-    answer("utils", correct = TRUE),
-    answer("codetools")
-  ),
-  question("Which of the R packages listed below are used to create plots?",
-    answer("lattice", correct = TRUE),
-    answer("tools"),
-    answer("stats"),
-    answer("grid", correct = TRUE)
-  )
-)
-```
 
 ## Finding critical values
 
@@ -529,20 +508,62 @@ c(xbar - crit_t*se, xbar + crit_t*se)
 
 ### 2. 
 
-Suppose that the readings of a laboratory scale are normally distributed with unknown mean $\mu$ and standard deviation $\sigma$ = 0.01 grams. To assess the accuracy of the laboratory scale, a standard weight that is known to weigh exactly 1 gram is repeatedly weighed a total of *N* = 50 times. Let $\bar{x}$ = 0.998 be the average of the 50 readings. What is the 95% confidence interval for $\mu$?
+Let's return to our aspiring astronauts. What is the 95% confidence interval for $\mu$ (assume 2-tailed)? Here are the statistics you need:
 
-**Hint: since you know $\sigma$ but not the sample standard deviation, you should use the normal distribution, not the t-distribution.**
+```{r ci2-pre}
+# sample statistics
+xbar <- 105
+n_samp <- 25
 
-```{r ci2, exercise=TRUE, eval = FALSE, exercise.lines = 5}
-xbar <- 0.998
-sigma <- 0.01
-N <- 50
+# population statistics
+mu0 <- 100
+sigma <- 15
+```
+
+```{r ci2, exercise = TRUE}
+
 ```
 
 ```{r print-ci2-hint}
-xbar <- 0.998
-sigma <- 0.01
-N <- 50
-crit_z <- qnorm(c(.025, .975), mean = 1, sd = .01)
+# margin of error
+me <- qnorm(.975) * (sigma/sqrt(n_samp)) # .975 --> .025 at EACH tail
+
+# 95% confidence intervals
+lowerz <- xbar - me
+upperz <- xbar + me
+c(lowerz, upperz)
+
+# even quicker!
+#(confintz <- qnorm(c(.025, .975), xbar, sigma/sqrt(n_samp)))
+```
+
+### 3. 
+
+Let's return to our aspiring astronauts, and assume that we actually don't know $\sigma$, the standard deviation of IQ scores in the population, but we choose to estimate it with our sample standard deviation. What is the 95% confidence interval for $\mu$ (assume 2-tailed)? Here are the statistics you need:
+
+```{r ci3-pre}
+# sample statistics
+xbar <- 105
+n_samp <- 25
+sd <- 13
+```
+
+```{r ci3, exercise = TRUE}
+
+```
+
+```{r print-ci3-hint}
+# sample statistics
+xbar <- 105
+sd <- 13
+n_samp <- 25
+
+# margin of error
+me <- qt(.975, n_samp - 1) * (sd/sqrt(n_samp)) # .975 --> .025 at EACH tail
+
+# 95% confidence intervals
+lowert <- xbar - me
+uppert <- xbar + me
+c(lowert, uppert)
 ```
 
